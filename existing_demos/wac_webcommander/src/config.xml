@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget  xmlns="http://www.w3.org/ns/widgets"
+         xmlns:wac="http://wacapps.net/ns/widgets"
+         id="http://test.webvm.net/WebCommander.wgt"
+         version="0.4.2"
+         viewmodes="fullscreen"
+         wac:min-version="2.0">
+    <feature name="http://wacapps.net/api/filesystem" required="true"/>
+    <name>Web Commander</name>
+    <description>A Norton Commander like widget.</description>
+    <author  email="sdk@bondisdk.org"
+		href="http://bondi.limofoundation.org/">LiMo Foundation</author>
+</widget>
