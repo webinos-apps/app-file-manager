@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://webinos.fokus.fraunhofer.de/apps/webcommander" version="0.5.4" viewmodes="fullscreen">  
+ 	<name>Web Commander</name>  
+  
+  	<description>A Norton Commander like widget that allows to browse through your directories and edit text files.</description>
+    
+  	<author href="http://www.fokus.fraunhofer.de/go/fame" 
+      	  	email="aydan.seid@fokus.fraunhofer.de">Aydan Seid, Felix-Johannes Jendrusch</author>
+  	  
+  	<content src="index.html"/>  
+  	<icon src="icon.jpg"/>
+  	  
+  	<feature name="http://www.w3.org/ns/api-perms/file.system" required="false"/>
+  	<feature name="http://www.w3.org/ns/api-perms/file.read" required="false"/>
+  	<feature name="http://www.w3.org/ns/api-perms/file.write" required="false"/>
+  	
+   	<update-description href="http://adenin.fokus.fraunhofer.de/mwr/AppList?update=http://bondisdk.limofoundation.org/widget/webcmd"/> 
+</widget>

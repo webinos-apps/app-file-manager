@@ -1,0 +1,164 @@
+<html>
+	
+	<head>
+		<meta name="viewport" content="width=device-width" />
+		<meta charset="utf-8" />
+		
+		<title>Web Commander</title>
+		
+		<link type="text/css" href="css/main.css" rel="stylesheet" />
+		<link type="text/css" href="css/custom-theme/jquery-ui-1.8.21.custom.css" rel="stylesheet" />
+		
+		<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.21.custom.min.js"></script>
+		<script type="text/javascript" src="js/jquery.tmpl.min.js"></script>
+		<script type="text/javascript" src="js/explorer.js"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+		
+		<script id="parent" type="text/x-jquery-tmpl">
+			<tr class="parent">
+				<td class="first name">${name}</td>
+				<td class="middle">&lt;DIR&gt;</td>
+				<td class="last mdate"></td>
+			</tr>
+		</script>
+		
+		<script id="directory" type="text/x-jquery-tmpl">
+			<tr class="directory">
+				<td class="first"><div class="name">${name}</div></td>
+				<td class="middle">&lt;DIR&gt;</td>
+				<td class="last mdate"></td>
+			</tr>
+		</script>
+		
+		<script id="file" type="text/x-jquery-tmpl">
+			<tr class="file">
+				<td class="first"><div class="name">${name}</div></td>
+				<td class="middle"></td>
+				<td class="last mdate"></td>
+			</tr>
+		</script>
+	</head>	
+	
+	<body>
+		<div id="content_wrapper">
+		<div id="explorer_content">
+			<div id="left_column">
+				<div class="tab_number" onclick="moveExpRight();"><span class="current">[1]</span> <span class="other">&gt;&gt; [2]</span></div>
+				
+				<div class="service_select_wrap">
+					<select id="left_fs_service" onchange="loadFileSystem(this.value, 'left'); this.blur();">
+						<option disabled="disabled" selected="selected">Select filesystem</option>
+					</select>
+				</div>
+				
+				<div id="left_wrap">
+					<table id="left">
+						<caption></caption>
+						<thead>
+							<tr>
+								<th class="first">Name</th>
+								<th class="middle">Size</th>
+								<th class="last">Date</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+						</tbody>
+						
+						<tfoot>
+							<tr>
+								<td class="first"></td>
+								<td class="middle"></td>
+								<td class="last"></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				
+				<div id="left_exp_actions">
+					<span class="action_button newDir">[New Folder]</span>
+					<span class="action_button newFile">[New File]</span>
+					<span class="action_button refresh">[Refresh]</span>
+				</div>
+			</div>
+			
+			<div id="right_column">
+				<div class="tab_number" onclick="moveExpLeft();"><span class="other">[1] &lt;&lt; </span><span class="current">[2]</span></div>
+				
+				<div class="service_select_wrap">
+					<select id="right_fs_service" onchange="loadFileSystem(this.value, 'right'); this.blur();">
+						<option disabled="disabled" selected="selected">Select filesystem</option>
+					</select>
+				</div>
+				
+				<div id="right_wrap">
+					<table id="right">
+						<caption></caption>
+						<thead>
+							<tr>
+								<th class="first">Name</th>
+								<th class="middle">Size</th>
+								<th class="last">Date</th>
+							</tr>
+						</thead>
+						
+						<tbody>
+						</tbody>
+						
+						<tfoot>
+							<tr>
+								<td class="first"></td>
+								<td class="middle"></td>
+								<td class="last"></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				
+				<div id="right_exp_actions">
+					<span class="action_button newDir">[New Folder]</span>
+					<span class="action_button newFile">[New File]</span>
+					<span class="action_button refresh">[Refresh]</span>
+				</div>
+			</div>
+			
+			<div id="file_actions">
+				<div id="action_button_wrapper">
+					<span class="file_action_button copy">[Copy]</span>
+					<span class="file_action_button move">[Move]</span>
+					<span class="file_action_button delete">[Delete]</span>
+					<span class="file_action_button cancel">[Cancel]</span>
+					
+					<div id="copy_actions">
+						<span id="copy_there">[Copy to other window]</span>
+						<span id="copy_here">[Copy to source window]</span>
+					</div>
+					
+					<div id="move_actions">
+						<span id="move_there">[Move to other window]</span>
+						<span id="move_here">[Move to source window]</span>
+					</div>
+				</div>
+			</div>
+			
+			<div style="clear: both;"></div>
+		</div>
+		</div>
+		
+		<div id="name_dialog">
+			<input type="text" class="name" />
+			<div class="error"></div>
+		</div>
+		
+		<div id="action_dialog">
+			<div class="error"></div>
+		</div>
+		
+		<div id="edit_dialog">
+			<textarea class="content" rows="6"></textarea>
+			<div class="error"></div>
+		</div>
+	</body>
+	
+</html>
