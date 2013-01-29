@@ -1,0 +1,15 @@
+@font-face {
+    font-family: 'DejaVuSansMonoBook';
+    src: url('fonts/dejavu/DejaVuSansMono-webfont.eot');
+    src: url('fonts/dejavu/DejaVuSansMono-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/dejavu/DejaVuSansMono-webfont.woff') format('woff'),
+         url('fonts/dejavu/DejaVuSansMono-webfont.ttf') format('truetype'),
+         url('fonts/dejavu/DejaVuSansMono-webfont.svg#DejaVuSansMonoBook') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+.folder, .file, .parent, .labelPath {
+	font-family: DejaVuSansMonoBook;
+}
