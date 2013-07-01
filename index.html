@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,34 +29,49 @@
             </li>
         </script>
 
+        <script id="pzhShareTemplate" type="text/x-jquery-tmpl">
+            <li data-icon="false">
+                <a href="index.html#main">
+                    ${pzhName}
+                </a>
+            </li>
+        </script>
         <script src="js/main.js"></script>
     </head>
     <body>
         <div data-role="page" id="main">
             <div data-role="header" data-position="fixed">
                 <a href="#" data-icon="gear" class="ui-btn-right">Configuration</a>
-                <span class="ui-title">File Manager</span> 
+                <span class="ui-title">File Manager</span>
                 <div class="ui-grid-a">
                     <div class="ui-block-a">
                         <div class="ui-bar ui-bar-d">
-                            <div data-role="fieldcontain">
-                                <label for="selectFileSystemLeft" class="select">FileSystem:</label>
-                                <select id="selectFileSystemLeft" onchange="loadFileSystem(this.value, 'Left'); this.blur();" data-mini="true">
-                                    <option disabled="true" selected="true">Select a file system</option>
-                                </select>
-                            </div>
+                            <select id="selectUserLeft" onchange="listSharedFolders(this.value, 'Left'); this.blur();" data-mini="true">
+                                <option disabled="true" selected="true">Select user</option>
+                            </select>
+                            <hr>
                             <label id="labelPathLeft" class="labelPath">&nbsp;</label>
+                            <hr>
+                            <div data-role="controlgroup" data-type="horizontal">
+                                <a href="#" data-role="button">Create folder</a>
+                                <a href="#" data-role="button">Share</a>
+                            </div>
                         </div>
                     </div>
+
+
                     <div class="ui-block-b">
                         <div class="ui-bar ui-bar-d">
-                            <div data-role="fieldcontain">
-                                <label for="selectFileSystemRight" class="select">FileSystem:</label>
-                                <select id="selectFileSystemRight" onchange="loadFileSystem(this.value, 'Right'); this.blur();" data-mini="true">
-                                    <option disabled="true" selected="true">Select a file system</option>
-                                </select>
-                            </div>
+                            <select id="selectUserRight" onchange="listSharedFolders(this.value, 'Right'); this.blur();" data-mini="true">
+                                <option disabled="true" selected="true">Select user</option>
+                            </select>
+                            <hr>
                             <label id="labelPathRight" class="labelPath">&nbsp;</label>
+                            <hr>
+                            <div data-role="controlgroup" data-type="horizontal">
+                                <a href="#" data-role="button">Create folder</a>
+                                <a href="#" data-role="button">Share</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -78,18 +93,18 @@
 
                 <div data-role="popup" id="popupMenuFile" data-theme="none">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
-                        <li class="popupMenuHeader" role="heading" data-role="list-divider">File</li>
+                        <li class="popupMenuFileHeader" role="heading" data-role="list-divider">File</li>
                         <li data-theme="c" data-icon="refresh"><a href="#" data-rel="dialog">Copy</a></li>
                         <li data-theme="c" data-icon="forward"><a href="#" data-rel="dialog">Move</a></li>
                         <li data-theme="c" data-icon="delete"><a href="#" data-rel="dialog">Delete</a></li>
                     </ul>
                 </div>
-        
+
                 <a id="popupMenuLinkFile" href="#popupMenuFile" data-position-to="window" data-rel="popup"></a>
 
                 <div data-role="popup" id="popupMenuFolder" data-theme="none">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
-                        <li class="popupMenuHeader" role="heading" data-role="list-divider">Folder</li>
+                        <li class="popupMenuFolderHeader" role="heading" data-role="list-divider">Folder</li>
                         <li data-theme="c" data-icon="arrow-r">
                             <a href="#popupMenuShare" data-position-to="window" data-rel="popup">Share</a>
                         </li>
@@ -98,8 +113,36 @@
                         <li data-theme="c" data-icon="delete"><a href="#" data-rel="dialog">Delete</a></li>
                     </ul>
                 </div>
-        
+
                 <a id="popupMenuLinkFolder" href="#popupMenuFolder" data-position-to="window" data-rel="popup"></a>
+
+                <div data-role="popup" id="popupMenuFF" data-theme="none">
+                    <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
+                        <li class="popupMenuFFHeader" role="heading" data-role="list-divider">.</li>
+                        <li data-theme="c" data-icon="star"><a href="#popupCreateFile" data-position-to="window" data-rel="popup">Create file</a></li>
+                        <li data-theme="c" data-icon="grid"><a href="#popupCreateFolder" data-position-to="window" data-rel="popup">Create folder</a></li>
+                    </ul>
+                </div>
+
+                <a id="popupMenuLinkFF" href="#popupMenuFF" data-position-to="window" data-rel="popup"></a>
+
+                <a id="backLink" href="#main"></a>
+
+                <div data-role="popup" id="popupCreateFile" data-theme="none">
+                    <div style="padding:10px 20px;">
+                        <input type="text" name="filename" id="filename" value="" placeholder="File Name" data-theme="c" />
+                        <a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+                        <a id="popupCreateFileOK" href="#" data-role="button" data-rel="back" data-inline="true" data-theme="b">OK</a>
+                    </div>
+                </div>
+
+                <div data-role="popup" id="popupCreateFolder" data-theme="none">
+                    <div style="padding:10px 20px;">
+                        <input type="text" name="foldername" id="foldername" value="" placeholder="Folder Name" data-theme="c" />
+                        <a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+                        <a id="popupCreateFolderOK" href="#" data-role="button" data-rel="back" data-inline="true" data-theme="b">OK</a>
+                    </div>
+                </div>
 
                 <div class="ui-grid-a">
                     <div class="ui-block-a">
@@ -114,6 +157,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <div data-role="page" id="share">
@@ -125,6 +169,6 @@
                 <ul id="listviewPageShare" data-role="listview" data-filter="true" data-inset="true">
                 </ul>
             </div>
-        </div>   
+        </div>
     </body>
 </html>
