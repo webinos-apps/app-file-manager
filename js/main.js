@@ -47,7 +47,11 @@ function fsDiscovery(serviceFilter, side){
     webinos.discovery.findServices(
         new ServiceType('http://webinos.org/api/file')
       , {
-            onFound: function(service){ if (service.id === serviceFilter.id) fsFound(service, side) }
+            onFound: function(service){ 
+                if ((service.id === serviceFilter.id) && (service.address === serviceFilter.serviceAddress)) {
+                    fsFound(service, side) 
+                }
+            }
           , onError: error
         }
     );
