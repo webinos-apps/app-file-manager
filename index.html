@@ -46,9 +46,7 @@
                 <div class="ui-grid-a">
                     <div class="ui-block-a">
                         <div class="ui-bar ui-bar-d">
-                            <select id="selectUserLeft" onchange="listSharedFolders(this.value, 'Left'); this.blur();" data-mini="true">
-                                <option disabled="true" selected="true">Select user</option>
-                            </select>
+                            <a href="#" data-role="button" onClick="callExplorer('Left')">Select Filesystem</a>
                             <hr>
                             <label id="labelPathLeft" class="labelPath">&nbsp;</label>
                             <hr>
@@ -62,9 +60,7 @@
 
                     <div class="ui-block-b">
                         <div class="ui-bar ui-bar-d">
-                            <select id="selectUserRight" onchange="listSharedFolders(this.value, 'Right'); this.blur();" data-mini="true">
-                                <option disabled="true" selected="true">Select user</option>
-                            </select>
+                            <a href="#" data-role="button" onClick="callExplorer('Right')">Select Filesystem</a>
                             <hr>
                             <label id="labelPathRight" class="labelPath">&nbsp;</label>
                             <hr>

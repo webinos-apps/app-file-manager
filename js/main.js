@@ -1,14 +1,7 @@
-var fsServices = {};
-var rootFSServices = {};
-
 var currentDirectory = {'Left':null, 'Right':null};
-var currentUser = {'Left':null, 'Right':null};
 var baseFolder = {'Left':null, 'Right':null};
 var selectedEntry = {'Left':'', 'Right':''};
-
-var localUserLabel = 'Local User';
-
-var debug = {};
+var fsServices = {'Left':null, 'Right':null};
 
 $(document).ready(injectWebinos);
 
@@ -33,93 +26,36 @@ function injectWebinos() {
     }
 }
 
-function load() {
-    function serviceFoundCB(service) {
-        alert("found");
-        var user = localUserLabel;
-        var pos1 = service.serviceAddress.indexOf('_');
-        var pos2 = service.serviceAddress.lastIndexOf('/');
+function load() { }
 
-        if (pos2 > -1) {
-            user = service.serviceAddress.substring(pos1 + 1, pos2);
-        }
+function callExplorer(side) {
+    webinos.dashboard
+        .open({
+                module: 'explorer',
+                data: { service:'http://webinos.org/api/file' }
+              }
+            , function(){ console.log("***Dashboard opened on " + side + " side");} )
+              .onAction( function (data) { fsDiscovery(data.result, side); } );
+}
 
-        if (!fsServices[user]) {
-            var option = $('<option>');
-            option.attr('value', user);
-            option.text(user);
 
-            $('#selectUserLeft').append(option.clone());
-            $('#selectUserRight').append(option.clone());
-            fsServices[user] = [];
+function error(error) {
+    alert('Error: ' + error.message + ' (Code: #' + error.code + ')');
+}
 
-            var content =  $('#pzhShareTemplate').tmpl({
-                pzhName: user
-            });
-
-            try {
-                $('#listviewPageShare').append(content);
-                $('#listviewPageShare').listview('refresh');
-            } catch(err) {}
-        }
-
-        fsServices[user].push(service);
-        if (service.description.indexOf("/:") > -1){
-            rootFSServices[user] = service;
-        }
-    }
-
-    function error(error) {
-        alert('Error: ' + error.message + ' (Code: #' + error.code + ')');
-    }
-
+function fsDiscovery(serviceFilter, side){
     webinos.discovery.findServices(
         new ServiceType('http://webinos.org/api/file')
-        , {
-            onFound:serviceFoundCB
-          , onError:error
+      , {
+            onFound: function(service){ if (service.id === serviceFilter.id) fsFound(service, side) }
+          , onError: error
         }
     );
 }
 
-function listSharedFolders(user, side) {
-    currentUser[side] = user;
-    baseFolder[side] = [];
-
-    var i = 0;
-
-    $('#listviewPanel' + side).empty();
-    $('#labelPath' + side).text('\xa0');
-
-    var content = $('#parentTemplate').tmpl({
-        parentID:'parent' + side, parentName:'\xa0'
-    });
-    $('#listviewPanel' + side).append(content);
-
-    fsServices[user].forEach(
-        function (entry) {
-            var content = $('#entryTemplate').tmpl({
-                    entryID:'entry' + side + (++i)
-                  , entryClass:'folder'
-                  , entryName:entry.description.split(':')[0]
-                  , entryIcon:'images/folder.png'
-                }
-            );
-            $('#listviewPanel' + side).append(content);
-
-            $('#entry' + side + i).click(loadSharedFolder.bind(this, entry, side));
-        }
-    );
-    $('#listviewPanel' + side).append('<li></li>');
-    $('#listviewPanel' + side).listview('refresh');
-
-}
-
-function loadSharedFolder (service, side) {
-    if (!service){
-        return;
-    }
-
+function fsFound(service, side) {
+    fsServices[side] = service;
+    
     baseFolder[side] = service.description.split(": ");
 
     service.bindService({
@@ -162,9 +98,7 @@ function loadDirectory(directory, side) {
             });
             $('#listviewPanel' + side).append(content);
 
-            if (directory.fullPath == '/'){
-                $('#parent' + side).click(listSharedFolders.bind(this, currentUser[side], side));
-            } else {
+            if (directory.fullPath != '/'){
                 $('#parent' + side).click(loadDirectory.bind(this, parent, side));
             }
         }
