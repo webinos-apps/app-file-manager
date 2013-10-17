@@ -3,7 +3,12 @@ var baseFolder = {'Left':null, 'Right':null};
 var selectedEntry = {'Left':'', 'Right':''};
 var fsServices = {'Left':null, 'Right':null};
 
-$(document).ready(injectWebinos);
+$(document).ready(function(){
+    $('#selectFilesystemLeft').bind('click', function(){ callExplorer('Left') });
+    $('#selectFilesystemRight').bind('click', function(){ callExplorer('Right') });
+    $('#configuration').bind('click', function(){ callServiceConfiguration('Right') });
+    injectWebinos();
+});
 
 function injectWebinos() {
     if (window.WebSocket || window.MozWebSocket || WebinosSocket) {
@@ -30,14 +35,48 @@ function load() { }
 
 function callExplorer(side) {
     webinos.dashboard
-        .open({
-                module: 'explorer',
-                data: { service:'http://webinos.org/api/file' }
-              }
-            , function(){ console.log("***Dashboard opened on " + side + " side");} )
-              .onAction( function (data) { fsDiscovery(data.result, side); } );
+        .open({            
+                module: 'explorer'
+              , data: { service:'http://webinos.org/api/file' }
+            }
+          , function(){ console.log("***Dashboard opened on " + side + " side");} )
+                .onAction( function (data) { fsDiscovery(data.result[0], side); } );
 }
 
+function callServiceConfiguration() {
+    webinos.dashboard
+        .open({
+                module: 'serviceConfiguration'
+              , data: 'http://webinos.org/api/file'
+            }
+          , function(){ })
+                .onAction(function(){alert("done")});
+}
+
+function callServiceSharing() {
+    webinos.dashboard
+        .open(
+            {
+                module: 'serviceSharing'
+              , data: {
+                    apiURI: 'http://webinos.org/api/file'
+                  , params: {
+                        local: {
+                            shares: [
+                                {   name: 'data'
+                                ,   path: '/mnt/data'
+                                }
+                              , {   name: 'home'
+                                ,   path: '/home/peter'
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+          , function(){ })
+                .onAction(function(){alert("done")});
+}
 
 function error(error) {
     alert('Error: ' + error.message + ' (Code: #' + error.code + ')');
