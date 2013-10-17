@@ -41,12 +41,13 @@
     <body>
         <div data-role="page" id="main">
             <div data-role="header" data-position="fixed">
-                <a href="#" data-icon="gear" class="ui-btn-right">Configuration</a>
+                <a id="configuration" href="#" data-icon="gear" class="ui-btn-right">Configure</a>
+                <a id="sharing" href="#" data-icon="person" class="ui-btn-right">Share</a>
                 <span class="ui-title">File Manager</span>
                 <div class="ui-grid-a">
                     <div class="ui-block-a">
                         <div class="ui-bar ui-bar-d">
-                            <a href="#" data-role="button" onClick="callExplorer('Left')">Select Filesystem</a>
+                            <a id="selectFilesystemLeft" href="#" data-role="button">Select Filesystem</a>
                             <hr>
                             <label id="labelPathLeft" class="labelPath">&nbsp;</label>
                             <hr>
@@ -60,7 +61,7 @@
 
                     <div class="ui-block-b">
                         <div class="ui-bar ui-bar-d">
-                            <a href="#" data-role="button" onClick="callExplorer('Right')">Select Filesystem</a>
+                            <a id="selectFilesystemRight" href="#" data-role="button">Select Filesystem</a>
                             <hr>
                             <label id="labelPathRight" class="labelPath">&nbsp;</label>
                             <hr>
