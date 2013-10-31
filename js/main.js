@@ -1,7 +1,10 @@
 var currentDirectory = {'Left':null, 'Right':null};
 var baseFolder = {'Left':null, 'Right':null};
 var selectedEntry = {'Left':'', 'Right':''};
+var selectedSide;
+var clipboard = { 'entry': null, 'action': null};
 var fsServices = {'Left':null, 'Right':null};
+var fsMap = {'Left':null, 'Right':null};
 
 $(document).ready(function(){
     $('#selectFilesystemLeft').bind('click', function(){ callExplorer('Left') });
@@ -35,7 +38,7 @@ function load() { }
 
 function callExplorer(side) {
     webinos.dashboard
-        .open({            
+        .open({
                 module: 'explorer'
               , data: { service:'http://webinos.org/api/file' }
             }
@@ -86,9 +89,9 @@ function fsDiscovery(serviceFilter, side){
     webinos.discovery.findServices(
         new ServiceType('http://webinos.org/api/file')
       , {
-            onFound: function(service){ 
+            onFound: function(service){
                 if ((service.id === serviceFilter.id) && (service.address === serviceFilter.serviceAddress)) {
-                    fsFound(service, side) 
+                    fsFound(service, side)
                 }
             }
           , onError: error
@@ -98,9 +101,8 @@ function fsDiscovery(serviceFilter, side){
 
 function fsFound(service, side) {
     fsServices[side] = service;
-    
-    baseFolder[side] = service.description.split(": ");
 
+    baseFolder[side] = service.description.split(": ");
     service.bindService({
         onBind:function () {
             service.requestFileSystem(
@@ -123,6 +125,7 @@ function fsFound(service, side) {
 
 function loadDirectory(directory, side) {
     $('#listviewPanel' + side).empty();
+    fsMap[side] = new Object();
     $('#labelPath' + side).text(baseFolder[side][0] + ((directory.fullPath=='/') ? '' : directory.fullPath));
 
     $('#labelPath' + side).on('taphold', function (e) {
@@ -135,6 +138,7 @@ function loadDirectory(directory, side) {
 
     directory.getParent(
         function (parent) {
+
             var content = $('#parentTemplate').tmpl({
                 parentID:'parent' + side
               , parentName: '..' /* ((directory.fullPath == '/') ? '.' : '..')*/
@@ -156,10 +160,14 @@ function loadDirectory(directory, side) {
             function (entry) {
                 var entryType = ((entry.isDirectory == true) ? 'folder' : 'file');
                 var content = $('#entryTemplate').tmpl({
-                        entryID:'entry' + side + (++i), entryClass:entryType, entryName:entry.name, entryIcon:'images/' + entryType + '.png'
+                        entryID:'entry' + side + (++i),
+                        entryClass: entryType,
+                        entryName: entry.name,
+                        entryIcon: 'images/' + entryType + '.png',
                     }
                 );
                 $('#listviewPanel' + side).append(content);
+                fsMap[side]['entry' + side + i] = entry;
                 if (entry.isDirectory == true) {
                     $('#entry' + side + i).click(loadDirectory.bind(this, entry, side));
                 }
@@ -171,14 +179,19 @@ function loadDirectory(directory, side) {
 
         $('.folder').on('taphold', function (e) {
             $('.popupMenuFolderHeader').html(e.currentTarget.text);
-            selectedEntry[side] = baseFolder[side][1] + ((currentDirectory[side].fullPath=='/')?'':currentDirectory[side].fullPath) + '/' + e.currentTarget.text;
+            selectedEntry[side] = baseFolder[side][1] + ((currentDirectory[side].fullPath=='/')?'':currentDirectory[side].fullPath) + e.currentTarget.text;
+            selectedSide = side;
             e.stopPropagation();
             $('#popupMenuLinkFolder').click();
         });
 
         $('.file').on('taphold', function (e) {
             $('.popupMenuFileHeader').html(e.currentTarget.text);
-            selectedEntry[side] = baseFolder[side][1] + ((currentDirectory[side].fullPath=='/')?'':currentDirectory[side].fullPath) + '/' + e.currentTarget.text;
+            //~ selectedEntry[side] = baseFolder[side][1] + ((currentDirectory[side].fullPath=='/')?'':currentDirectory[side].fullPath) + e.currentTarget.text;
+            selectedSide = e.currentTarget.id.indexOf('Left') != -1 ? 'Left' : 'Right';
+            selectedEntry[selectedSide] = e.currentTarget.id;
+
+            clipboard.entry == null ? $('#paste').addClass('ui-disabled') : $('#paste').removeClass('ui-disabled');
             e.stopPropagation();
             $('#popupMenuLinkFile').click();
         });
@@ -198,28 +211,80 @@ function loadDirectory(directory, side) {
     reader.readEntries(successCallback, errorCallback);
 }
 
-function createDirectory(name, side) {
-    currentDirectory[side].getDirectory(name,
-        {create:true, exclusive:true},
-        function (entry) {
-            alert('Directory ' + entry.name + ' was successfully created')
-        },
-        function () {
-            alert('Error while creating the directory')
-        }
-    );
-    loadDirectory(currentDirectory[side], side);
+function copyFile() {
+   console.log("--------- COPY COPY COPY ---------");
+   clipboard.side = selectedSide;
+   clipboard.entry = fsMap[selectedSide][selectedEntry[selectedSide]];
+   clipboard.action = 'copy';
 }
 
-function createFile(name, side) {
-    currentDirectory[side].getFile(name,
-        {create:true, exclusive:true},
-        function (entry) {
-            alert('File ' + entry.name + ' was successfully created')
-        },
-        function () {
-            alert('Error while creating the file')
-        }
-    );
-    loadDirectory(currentDirectory[side], side);
+function cutFile() {
+   console.log("--------- CUT CUT CUT ---------");
+   clipboard.side = selectedSide;
+   clipboard.entry = fsMap[selectedSide][selectedEntry[selectedSide]];
+   clipboard.action = 'cut';
 }
+
+function paste() {
+   console.log("--------- PASTE PASTE PASTE ---------");
+
+   createFile(clipboard.entry.name, selectedSide, function (newEntry){
+      newEntry.createWriter(function (writer){
+         $("#loadingPopup").popup("open");
+         clipboard.entry.file(function(data){
+            console.debug('SUCCESS CALL BACK');
+            writer.write(data);
+
+            if(clipboard.action == 'cut'){
+               clipboard.entry.remove(function(){}, function(){});
+               loadDirectory(currentDirectory[clipboard.side], clipboard.side);
+            }
+
+            $("#loadingPopup").popup("close");
+
+            clipboard.side = null;
+            clipboard.entry = null;
+            clipboard.action = null;
+         }, function(error){console.log('READ FILE ERROR: '); console.log(error);});
+      }, function(error){console.log('WRITE FILE ERROR: '); console.log(error);});
+   }, function(error){console.log('CREATE FILE ERROR: '); console.log(error);});
+}
+
+function deleteFile(entry, side, successCB) {
+
+   side = selectedSide;
+   entry = fsMap[selectedSide][selectedEntry[selectedSide]];
+
+   entry.remove(function(){
+      loadDirectory(currentDirectory[side], side);
+      successCB();
+      }, function(){}
+   );
+}
+
+function createDirectory(name, side) {
+   currentDirectory[side].getDirectory(name,
+      {create:true, exclusive:true},
+      function (entry) {
+         alert('Directory ' + entry.name + ' was successfully created')
+      },
+      function () {
+         alert('Error while creating the directory')
+      }
+   );
+   loadDirectory(currentDirectory[side], side);
+}
+
+function createFile(name, side, successCB) {
+   currentDirectory[side].getFile(name,
+      {create:true, exclusive:true},
+      function (entry) {
+         successCB(entry);
+      },
+      function () {
+         alert('Error while creating the file')
+      }
+   );
+   loadDirectory(currentDirectory[side], side);
+}
+
