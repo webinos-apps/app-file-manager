@@ -6,11 +6,11 @@
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <title>File Manager</title>
-        <link rel="stylesheet" href="css/jquery.mobile-1.2.0.min.css" />
+        <link rel="stylesheet" href="css/jquery.mobile-1.3.2.min.css" />
         <link rel="stylesheet" href="css/font.css" />
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.tmpl.min.js"></script>
-        <script src="js/jquery.mobile-1.2.0.min.js"></script>
+        <script src="js/jquery.mobile-1.3.2.min.js"></script>
 
         <script id="entryTemplate" type="text/x-jquery-tmpl">
             <li data-icon="false">
@@ -76,7 +76,7 @@
 
             <div data-role="content">
 
-                <div data-role="popup" id="popupMenuShare" data-theme="none">
+                <div data-role="popup" id="popupMenuShare" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li role="heading" data-role="list-divider">Share</li>
                         <li data-theme="c" data-icon="grid"><a href="#share" data-rel="dialog">List PZHs</a></li>
@@ -88,32 +88,32 @@
                     </ul>
                 </div>
 
-                <div data-role="popup" id="popupMenuFile" data-theme="none">
+                <div data-role="popup" id="popupMenuFile" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li class="popupMenuFileHeader" role="heading" data-role="list-divider">File</li>
-                        <li data-theme="c" data-icon="refresh"><a href="#" data-rel="dialog">Copy</a></li>
-                        <li data-theme="c" data-icon="forward"><a href="#" data-rel="dialog">Move</a></li>
-                        <li data-theme="c" data-icon="delete"><a href="#" data-rel="dialog">Delete</a></li>
+                        <li data-theme="c" data-icon="refresh" onclick="copyFile()"><a href="#popupMenuFile" data-rel="dialog">Copy</a></li>
+                        <li data-theme="c" data-icon="forward" onclick="cutFile()"><a href="#popupMenuFile" data-rel="dialog">Cut</a></li>
+                        <li data-theme="c" data-icon="refresh" onclick="paste()" id="paste"><a href="#popupMenuFile" data-rel="dialog">Paste</a></li>
+                        <li data-theme="c" data-icon="delete" onclick="deleteFile()"><a href="#popupMenuFile" data-rel="dialog">Delete</a></li>
                     </ul>
                 </div>
 
                 <a id="popupMenuLinkFile" href="#popupMenuFile" data-position-to="window" data-rel="popup"></a>
 
-                <div data-role="popup" id="popupMenuFolder" data-theme="none">
+                <div data-role="popup" id="popupMenuFolder" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li class="popupMenuFolderHeader" role="heading" data-role="list-divider">Folder</li>
-                        <li data-theme="c" data-icon="arrow-r">
-                            <a href="#popupMenuShare" data-position-to="window" data-rel="popup">Share</a>
-                        </li>
+                        <li data-theme="c" data-icon="arrow-r"><a href="#popupMenuShare" data-position-to="window" data-rel="popup">Share</a></li>
                         <li data-theme="c" data-icon="refresh"><a href="#" data-rel="dialog">Copy</a></li>
-                        <li data-theme="c" data-icon="forward"><a href="#" data-rel="dialog">Move</a></li>
+                        <li data-theme="c" data-icon="forward"><a href="#" data-rel="dialog">Cut</a></li>
+                        <li data-theme="c" data-icon="refresh" id="paste"><a href="#" data-rel="dialog">Paste</a></li>
                         <li data-theme="c" data-icon="delete"><a href="#" data-rel="dialog">Delete</a></li>
                     </ul>
                 </div>
 
                 <a id="popupMenuLinkFolder" href="#popupMenuFolder" data-position-to="window" data-rel="popup"></a>
 
-                <div data-role="popup" id="popupMenuFF" data-theme="none">
+                <div data-role="popup" id="popupMenuFF" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li class="popupMenuFFHeader" role="heading" data-role="list-divider">.</li>
                         <li data-theme="c" data-icon="star"><a href="#popupCreateFile" data-position-to="window" data-rel="popup">Create file</a></li>
@@ -123,9 +123,19 @@
 
                 <a id="popupMenuLinkFF" href="#popupMenuFF" data-position-to="window" data-rel="popup"></a>
 
+                <div data-role="popup" id="loadingPopup" data-overlay-theme="a" data-theme="a" data-dismissible=false  align="center" style="margin: 30px; padding: 20px;">
+                    <div style="padding:10px 20px;">
+                        <img src="./images/478.gif" height="100px" /><br/><br/>
+                        <a>Please wait until the operation is completed</a>
+                    </div>
+                </div>
+
+                <a id="loadingPopupActuator" href="#loadingPopup" data-position-to="window" data-rel="popup"></a>
+
+
                 <a id="backLink" href="#main"></a>
 
-                <div data-role="popup" id="popupCreateFile" data-theme="none">
+                <div data-role="popup" id="popupCreateFile" data-theme="a">
                     <div style="padding:10px 20px;">
                         <input type="text" name="filename" id="filename" value="" placeholder="File Name" data-theme="c" />
                         <a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
