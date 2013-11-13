@@ -5,6 +5,8 @@ var selectedSide;
 var clipboard = { 'entry': null, 'action': null};
 var fsServices = {'Left':null, 'Right':null};
 var fsMap = {'Left':null, 'Right':null};
+var waitCounter = 0;
+var directoryCounter = 0;
 
 $(document).ready(function(){
     $('#selectFilesystemLeft').bind('click', function(){ callExplorer('Left') });
@@ -130,6 +132,7 @@ function loadDirectory(directory, side) {
 
     $('#labelPath' + side).on('taphold', function (e) {
         $('.popupMenuFFHeader').html('In ' + e.currentTarget.innerText + ' :');
+        clipboard.entry == null ? $('#pasteDirFF').addClass('ui-disabled') : $('#pasteDirFF').removeClass('ui-disabled');
         e.stopPropagation();
         $('#popupMenuLinkFF').click();
 //        $('#popupCreateFileOK')[0].href = 'javascript:createFile($('#filename').val(),''+side+'');';
@@ -174,13 +177,24 @@ function loadDirectory(directory, side) {
             }
         );
 
-        $('#listviewPanel' + side).append('<li></li>');
+
+        $('#listviewPanel' + side).append('<li class="emptyli" id="emptyli' + side + '" style="height: 100px"></li>');
         $('#listviewPanel' + side).listview('refresh');
+
+        $('.emptyli').on('taphold', function (e) {
+            $('.popupMenuFFHeader').html('In ' + directory.filesystem.name + ' :');
+            selectedSide = e.currentTarget.id.indexOf('Left') != -1 ? 'Left' : 'Right';
+            selectedEntry[selectedSide] = directory;
+            clipboard.entry == null ? $('#pasteDirFF').addClass('ui-disabled') : $('#pasteDirFF').removeClass('ui-disabled');
+            e.stopPropagation();
+            $('#popupMenuLinkFF').click();
+        });
 
         $('.folder').on('taphold', function (e) {
             $('.popupMenuFolderHeader').html(e.currentTarget.text);
-            selectedEntry[side] = baseFolder[side][1] + ((currentDirectory[side].fullPath=='/')?'':currentDirectory[side].fullPath) + e.currentTarget.text;
-            selectedSide = side;
+            selectedSide = e.currentTarget.id.indexOf('Left') != -1 ? 'Left' : 'Right';
+            selectedEntry[selectedSide] = e.currentTarget.id;
+            clipboard.entry == null ? $('#pasteDir').addClass('ui-disabled') : $('#pasteDir').removeClass('ui-disabled');
             e.stopPropagation();
             $('#popupMenuLinkFolder').click();
         });
@@ -211,14 +225,16 @@ function loadDirectory(directory, side) {
     reader.readEntries(successCallback, errorCallback);
 }
 
-function copyFile() {
+function copy() {
    console.log("--------- COPY COPY COPY ---------");
+   console.log(fsMap[selectedSide][selectedEntry[selectedSide]]);
    clipboard.side = selectedSide;
    clipboard.entry = fsMap[selectedSide][selectedEntry[selectedSide]];
    clipboard.action = 'copy';
+   console.log(webinos);
 }
 
-function cutFile() {
+function cut() {
    console.log("--------- CUT CUT CUT ---------");
    clipboard.side = selectedSide;
    clipboard.entry = fsMap[selectedSide][selectedEntry[selectedSide]];
@@ -228,45 +244,42 @@ function cutFile() {
 function paste() {
    console.log("--------- PASTE PASTE PASTE ---------");
 
-   createFile(clipboard.entry.name, selectedSide, function (newEntry){
-      newEntry.createWriter(function (writer){
-         $("#loadingPopup").popup("open");
-         clipboard.entry.file(function(data){
-            console.debug('SUCCESS CALL BACK');
-            writer.write(data);
+   var destinationDir = currentDirectory[selectedSide];
 
-            if(clipboard.action == 'cut'){
-               clipboard.entry.remove(function(){}, function(){});
-               loadDirectory(currentDirectory[clipboard.side], clipboard.side);
-            }
+   if(!selectedEntry[selectedSide].isDirectory)
+      if(fsMap[selectedSide][selectedEntry[selectedSide]].isDirectory)
+         destinationDir = fsMap[selectedSide][selectedEntry[selectedSide]];
 
-            $("#loadingPopup").popup("close");
-
-            clipboard.side = null;
-            clipboard.entry = null;
-            clipboard.action = null;
-         }, function(error){console.log('READ FILE ERROR: '); console.log(error);});
-      }, function(error){console.log('WRITE FILE ERROR: '); console.log(error);});
-   }, function(error){console.log('CREATE FILE ERROR: '); console.log(error);});
+   if(clipboard.entry.isDirectory)
+   {
+      copyDirectory(destinationDir, clipboard.entry, function(){});
+   }
+   else{
+      copyFile(destinationDir, clipboard.entry, function(){});
+   }
 }
 
-function deleteFile(entry, side, successCB) {
-
+function deleteEntry() {
    side = selectedSide;
    entry = fsMap[selectedSide][selectedEntry[selectedSide]];
 
-   entry.remove(function(){
-      loadDirectory(currentDirectory[side], side);
-      successCB();
-      }, function(){}
-   );
+   if(entry.isDirectory){
+      entry.removeRecursively(function(){
+         loadDirectory(currentDirectory[side], side);
+      }, function(){console.error("Unexpected error: impossible to remove" + entry.name)});
+   }
+   else {
+      entry.remove(function(){
+         loadDirectory(currentDirectory[side], side);
+      }, function(){console.error("Unexpected error: impossible to remove" + entry.name)});
+   }
 }
 
-function createDirectory(name, side) {
+function createDirectory(name, side, successCB) {
    currentDirectory[side].getDirectory(name,
       {create:true, exclusive:true},
       function (entry) {
-         alert('Directory ' + entry.name + ' was successfully created')
+         successCB(entry);
       },
       function () {
          alert('Error while creating the directory')
@@ -275,16 +288,128 @@ function createDirectory(name, side) {
    loadDirectory(currentDirectory[side], side);
 }
 
-function createFile(name, side, successCB) {
-   currentDirectory[side].getFile(name,
-      {create:true, exclusive:true},
-      function (entry) {
-         successCB(entry);
+
+
+function copyDirectory(parentDirectory, copyingDirectory, successCB) {
+   var dirReader = copyingDirectory.createReader();
+   dirReader.readEntries(function(entriesList){
+      startCopy();
+      parentDirectory.getDirectory(copyingDirectory.name,
+         {create:true, exclusive:true},
+         function (newDirectory) {
+            for(var i=0; i<entriesList.length; i++)
+            {
+               directoryCounter++;
+               if(entriesList[i].isDirectory) {
+                  copyDirectory(newDirectory, entriesList[i], dirCB);
+               }
+               else {
+                  copyFile(newDirectory, entriesList[i], dirCB);
+               }
+            }
+
+         });
       },
+      function () {
+         alert('Error while creating the directory')
+      }
+   );
+
+   function dirCB(){
+      directoryCounter--;
+      if(directoryCounter == 0){
+         finishedCopy();
+         if(typeof successCB == "function") successCB();
+      }
+   }
+}
+
+function copyFile(parentDirectory, copyingFile, successCB) {
+   parentDirectory.getFile(copyingFile.name,
+      {create:true, exclusive:true},
+      function (newEntry){
+         startCopy();
+         newEntry.createWriter(function (writer){
+            writer.onwriteend = function(evt){
+               console.log(evt);
+               finishedCopy();
+               if(typeof successCB == "function")successCB();
+            };
+            copyingFile.file(function(data){
+               writer.write(data);
+            }, function(error){console.error('READ FILE ERROR: '); console.error(error);});
+         }, function(error){console.error('WRITE FILE ERROR: '); console.error(error);});
+      }, function(error){console.error('CREATE FILE ERROR: '); console.error(error);},
       function () {
          alert('Error while creating the file')
       }
    );
+}
+
+function createFile(name, side, successCB) {
+   console.error(name);
+   currentDirectory[side].getFile(name,
+      {create:true, exclusive:true},
+      function (entry) {
+         if(typeof successCB == "function")successCB(entry);
+      },
+      function (err) {
+         alert('Error while creating the file');
+         console.error(err);
+      }
+   );
    loadDirectory(currentDirectory[side], side);
+}
+
+function startCopy(){
+   if (waitCounter == 0)
+   {
+      $("#loadingPopup").popup("open");
+   }
+   waitCounter++;
+}
+
+function finishedCopy(){
+   waitCounter = waitCounter == 0 ? 0 : waitCounter-1;
+
+   console.debug("WAIT COUNTER: " + waitCounter);
+
+   if (waitCounter == 0)
+   {
+      $("#loadingPopup").popup("close");
+
+      if (clipboard.action == "cut"){
+         var entry = clipboard.entry;
+         if(entry.isDirectory){
+            entry.removeRecursively(function(){
+            loadDirectory(currentDirectory[clipboard.side], clipboard.side);
+            clipboard.side = clipboard.entry = clipboard.action = null;
+            }, function(){console.error("Unexpected error: impossible to remove" + entry.name)});
+         }
+         else {
+            entry.remove(function(){
+               loadDirectory(currentDirectory[clipboard.side], clipboard.side);
+               clipboard.side = clipboard.entry = clipboard.action = null;
+            }, function(){console.error("Unexpected error: impossible to remove" + entry.name)});
+         }
+      }
+      else{
+         clipboard.side = clipboard.entry = clipboard.action = null;
+      }
+      loadDirectory(currentDirectory[selectedSide], selectedSide)
+   }
+}
+
+
+function openCreateFolderPopup(side){
+   if(currentDirectory[side]){
+      $("#popupCreateFolder").popup("open");
+      selectedSide = side;
+   }
+}
+
+function refresh(side){
+   if (currentDirectory[side])
+      loadDirectory(currentDirectory[side], side);
 }
 
