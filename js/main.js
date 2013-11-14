@@ -311,7 +311,8 @@ function copyDirectory(parentDirectory, copyingDirectory, successCB) {
          });
       },
       function () {
-         alert('Error while creating the directory')
+         alert('Error while creating the directory');
+         clipboard.action=null;
       }
    );
 
@@ -337,9 +338,9 @@ function copyFile(parentDirectory, copyingFile, successCB) {
             };
             copyingFile.file(function(data){
                writer.write(data);
-            }, function(error){console.error('READ FILE ERROR: '); console.error(error);});
-         }, function(error){console.error('WRITE FILE ERROR: '); console.error(error);});
-      }, function(error){console.error('CREATE FILE ERROR: '); console.error(error);},
+            }, function(error){console.error('READ FILE ERROR: '); console.error(error); clipboard.action=null; finishedCopy();});
+         }, function(error){console.error('WRITE FILE ERROR: '); console.error(error);clipboard.action=null; finishedCopy();});
+      }, function(error){console.error('CREATE FILE ERROR: '); console.error(error);clipboard.action=null; finishedCopy();},
       function () {
          alert('Error while creating the file')
       }
@@ -378,6 +379,8 @@ function finishedCopy(){
    {
       $("#loadingPopup").popup("close");
 
+
+      if(selectedSide != clipboard.side)loadDirectory(currentDirectory[selectedSide], selectedSide);
       if (clipboard.action == "cut"){
          var entry = clipboard.entry;
          if(entry.isDirectory){
@@ -396,7 +399,6 @@ function finishedCopy(){
       else{
          clipboard.side = clipboard.entry = clipboard.action = null;
       }
-      loadDirectory(currentDirectory[selectedSide], selectedSide)
    }
 }
 
