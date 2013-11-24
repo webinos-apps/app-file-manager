@@ -11,7 +11,7 @@ var directoryCounter = 0;
 $(document).ready(function(){
     $('#selectFilesystemLeft').bind('click', function(){ callExplorer('Left') });
     $('#selectFilesystemRight').bind('click', function(){ callExplorer('Right') });
-    $('#configuration').bind('click', function(){ callServiceConfiguration('Right') });
+    $('#configuration').bind('click', function(){ callServiceConfiguration() });
     injectWebinos();
 });
 
@@ -52,31 +52,21 @@ function callServiceConfiguration() {
     webinos.dashboard
         .open({
                 module: 'serviceConfiguration'
-              , data: 'http://webinos.org/api/file'
+              , data: {
+                    apiURI: 'http://webinos.org/api/file'
+                }
             }
           , function(){ })
                 .onAction(function(){alert("done")});
 }
 
-function callServiceSharing() {
+function callServiceSharing(instancesParams) {
     webinos.dashboard
-        .open(
-            {
+        .open({
                 module: 'serviceSharing'
               , data: {
                     apiURI: 'http://webinos.org/api/file'
-                  , params: {
-                        local: {
-                            shares: [
-                                {   name: 'data'
-                                ,   path: '/mnt/data'
-                                }
-                              , {   name: 'home'
-                                ,   path: '/home/peter'
-                                }
-                            ]
-                        }
-                    }
+                  , params: { instances: instancesParams }
                 }
             }
           , function(){ })
@@ -223,6 +213,38 @@ function loadDirectory(directory, side) {
     };
 
     reader.readEntries(successCallback, errorCallback);
+}
+
+function share() {
+    console.log("--------- SHARE SHARE SHARE---------");
+    var instancesParams = [{ 
+        "params": {
+            "local": {
+                "share": {
+                    "name": fsMap[selectedSide][selectedEntry[selectedSide]].name
+                  , "path": baseFolder[selectedSide][1] + fsMap[selectedSide][selectedEntry[selectedSide]].fullPath
+                }
+            }
+        }
+    }];
+    console.log(instancesParams);
+    callServiceSharing(instancesParams);
+}
+
+function shareCurrent(side) {
+    console.log("--------- SHARE SHARE SHARE---------");
+    var instancesParams = [{ 
+        "params": {
+            "local": {
+                "share": {
+                    "name": currentDirectory[side].name === "" ? currentDirectory[side].filesystem.name : currentDirectory[side].name 
+                  , "path": baseFolder[side][1] + currentDirectory[side].fullPath
+                }
+            }
+        }
+    }];
+    console.log(instancesParams);
+    callServiceSharing(instancesParams);
 }
 
 function copy() {
