@@ -42,7 +42,6 @@
         <div data-role="page" id="main" style="height: 100%">
             <div data-role="header" data-position="fixed">
                 <a id="configuration" href="#" data-icon="gear" class="ui-btn-right">Configure</a>
-                <a id="sharing" href="#" data-icon="person" class="ui-btn-right">Share</a>
                 <span class="ui-title">File Manager</span>
                 <div class="ui-grid-a" height = "100%">
                     <div class="ui-block-a" height = "100%">
@@ -55,7 +54,7 @@
                                 <div class="ui-block-a" height = "100%">
                                     <div data-role="controlgroup" data-type="horizontal">
                                         <a href="#" onclick="openCreateFolderPopup('Left')" data-role="button">Create folder</a>
-                                        <a href="#" data-role="button">Share</a>
+                                        <a href="#" onclick="shareCurrent('Left')" data-role="button">Share</a>
                                     </div>
                                 </div>
                                 <div class="ui-block-b" height = "100%">
@@ -77,7 +76,7 @@
                                 <div class="ui-block-a" height = "100%">
                                     <div data-role="controlgroup" data-type="horizontal">
                                         <a href="#" onclick="openCreateFolderPopup('Right')" data-role="button">Create folder</a>
-                                        <a href="#" data-role="button">Share</a>
+                                        <a href="#" onclick="shareCurrent('Right')" data-role="button">Share</a>
                                     </div>
                                 </div>
                                 <div class="ui-block-b" height = "100%">
@@ -92,18 +91,6 @@
             </div>
 
             <div data-role="content" style="height:100%">
-                <div data-role="popup" id="popupMenuShare" data-theme="a">
-                    <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
-                        <li role="heading" data-role="list-divider">Share</li>
-                        <li data-theme="c" data-icon="grid"><a href="#share" data-rel="dialog">List PZHs</a></li>
-                        <li data-theme="c" data-icon="plus"><a href="#share" data-rel="dialog">Add PZH</a></li>
-                        <li data-theme="c" data-icon="minus"><a href="#share" data-rel="dialog">Remove PZH</a></li>
-                        <li data-theme="c" data-icon="arrow-l">
-                            <a href="#popupMenuFolder" data-position-to="window" data-rel="popup">Back to previous menu</a>
-                        </li>
-                    </ul>
-                </div>
-
                 <div data-role="popup" id="popupMenuFile" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li class="popupMenuFileHeader" role="heading" data-role="list-divider">File</li>
@@ -119,7 +106,7 @@
                 <div data-role="popup" id="popupMenuFolder" data-theme="a">
                     <ul data-role="listview" data-inset="true" style="margin:0; width:250px;">
                         <li class="popupMenuFolderHeader" role="heading" data-role="list-divider">Folder</li>
-                        <li data-theme="c" data-icon="arrow-r"><a href="#popupMenuShare" data-position-to="window" data-rel="popup">Share</a></li>
+                        <li data-theme="c" data-icon="arrow-r" onclick="share()"><a href="#popupMenuFolder" data-rel="dialog">Share</a></li>
                         <li data-theme="c" data-icon="refresh" onclick="copy()"><a href="#popupMenuFolder" data-rel="dialog">Copy</a></li>
                         <li data-theme="c" data-icon="forward" onclick="cut()"><a href="#popupMenuFolder" data-rel="dialog">Cut</a></li>
                         <li data-theme="c" data-icon="refresh" onclick="paste()" id="pasteDir"><a href="#popupMenuFolder" data-rel="dialog">Paste into Folder</a></li>
