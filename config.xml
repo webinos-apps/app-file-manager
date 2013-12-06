@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://webinos.org/appFM" version="0.1">
+  <name>File manager</name>
+  <description>webinos app for file management.</description>
+  <content src="index.html" />
+  <author>Salvatore Monteleone (UniCT), Paolo Vergori (ISMB), Michele Morello (ISMB)</author>
+</widget>
+

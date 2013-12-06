@@ -1,0 +1,26 @@
+<project name="WebinosMediaCenterRemote" basedir="." default="main">    
+    <property name="build.dir" value="."/>
+    <property name="widget.file" value="FileAPP"/>  
+    <property name="src.dir" value="js"/>
+    <property name="css.dir" value="css"/>
+    <property name="img.dir" value="images"/>                
+  
+    <target name="clean">
+        <delete file="${build.dir}/${widget.file}.wgt" />
+    </target>
+    
+    <target name="build">
+        <zip destfile="${widget.file}.zip" encoding="UTF-8"> 
+            <fileset dir="${basedir}">                 
+                <include name="${css.dir}/**"/>
+                <include name="${src.dir}/**"/>
+                <include name="${img.dir}/**"/>
+                <include name="config.xml"/>
+                <include name="index.html"/>                
+            </fileset> 
+        </zip> 
+        <move file="${basedir}/${widget.file}.zip" tofile="${basedir}/${widget.file}.wgt"/>
+    </target>
+
+    <target name="main" depends="clean,build"/>
+</project>
